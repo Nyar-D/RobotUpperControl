@@ -1,2 +1,3 @@
 # robot_upper_control
 ROS导航机器人的上位控制软件，代码和文档正在更新中...
+![exhibition](https://user-images.githubusercontent.com/61311609/184302131-29993a66-5493-42f2-8abd-628ae4a530cb.png)
