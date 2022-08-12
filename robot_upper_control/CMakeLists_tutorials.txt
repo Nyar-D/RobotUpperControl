@@ -1,0 +1,111 @@
+##############################################################################
+# CMake
+##############################################################################
+
+cmake_minimum_required(VERSION 2.8.0)
+project(robot_upper_control)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+#添加c++11的支持
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
+##############################################################################
+# Catkin
+##############################################################################
+
+find_package(catkin REQUIRED COMPONENTS rviz roscpp
+    )
+
+include_directories(
+    ${catkin_INCLUDE_DIRS} 
+    include/${ROJECT_NAME}/
+    )
+
+# 该语句会定义变量CATKIN_PACKAGE_LIB_DESTINATION  CATKIN_PACKAGE_BIN_DESTINATION, 会用于设置输出等目录
+catkin_package()
+
+##############################################################################
+# Qt Environment
+##############################################################################
+
+#开启MOC、RCC和UIC，则会在预处理之前先进行MOC、RCC和UIC操作
+set(CMAKE_AUTOMOC ON)
+#set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+#设置UIC的查找路径，UIC默认会在引用ui头文件的源代码路径下查找ui文件，而我们的ui文件存放在/ui文件夹下
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui)
+
+#######
+# 安装多个 Qt 版本时, 可能会导致无法使用特定的 Qt 版本.
+# 需要设置 CMAKE_PREFIX_PATH 为所用 Qt 的安装路径, 但是还需要设置 Qt[Module]_DIR(例如: QtCore_DIR) 等变量.
+# 下面这一段代码自动会修改 ModuleList 中的所有模块, 并自动设置 Qt[Module]_DIR变量; 同时 target_link_libraries.
+set(CMAKE_PREFIX_PATH "/opt/Qt5.12.6/5.12.6/gcc_64")
+set(ModuleList 
+    Core
+    Gui
+    Widgets
+)
+
+foreach(QtModule ${ModuleList})
+    set(Qt5${QtModule}_DIR ${CMAKE_PREFIX_PATH}/lib/cmake/Qt5${QtModule})
+    message("foreach-> Qt5${QtModule}_DIR : ${Qt5${QtModule}_DIR}")
+
+    set(QT_LIBRARIES ${QT_LIBRARIES} Qt5::${QtModule})
+endforeach()
+message("${QT_LIBRARIES}")
+
+find_package(Qt5 REQUIRED ${ModuleList})
+#######
+
+##############################################################################
+# Sections
+##############################################################################
+
+#file(GLOB QT_FORMS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ui/*.ui)
+#file(GLOB QT_RESOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} resources/*.qrc)
+#file(GLOB_RECURSE QRC_SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} resources/*.qrc)
+file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/robot_upper_control/*.h)
+
+#set(QRC_SOURCE_FILES image.qrc)
+#qt5_add_resources(QRC_FILES ${QRC_SOURCE_FILES})
+#add_library(${PROJECT_NAME}
+#${QRC_FILES})
+
+#QT5_ADD_RESOURCES(QT_RESOURCES_CPP ${QT_RESOURCES})
+#QT5_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
+#QT5_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
+
+##############################################################################
+# Sources
+##############################################################################
+
+file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS src/*.cpp)
+
+##############################################################################
+# Binaries
+##############################################################################
+
+#add_executable(robot_upper_control ${QRC_FILES} ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC_HPP})
+add_executable(robot_upper_control ${QT_SOURCES} ${QT_MOC})
+target_link_libraries(robot_upper_control ${QT_LIBRARIES} ${catkin_LIBRARIES})
+#install(TARGETS robot_upper_control RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+#############################################################################
+#HTML 将html文件拷贝到可执行文件同级目录
+#############################################################################
+#file(REMOVE_RECURSE ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION}/html)
+#file(REMOVE_RECURSE ${CMAKE_INSTALL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION}/html)
+#file(COPY ${PROJECT_SOURCE_DIR}/html  DESTINATION ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION})
+#install(DIRECTORY ${PROJECT_SOURCE_DIR}/html DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+#message("PROJECT_SOURCE_DIR:${CMAKE_INSTALL_PREFIX}")
+
+#############################################################################
+#DEBUG && RELEASE
+#############################################################################
+#如果要生成debug版本
+#SET(CMAKE_BUILD_TYPE "Debug")
+#如果要生成release版本
+#SET(CMAKE_BUILD_TYPE "Release")
+#添加的支持debug和release支持
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+#SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")

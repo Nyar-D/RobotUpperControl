@@ -1,0 +1,7 @@
+float32 topLeftX 
+float32 topLeftY
+float32 bottomRightX
+float32 bottomRightY
+string gen_map_name
+---
+string status

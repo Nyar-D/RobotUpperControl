@@ -1,0 +1,16 @@
+<library path="lib/librobot_upper_plugins">
+  <class name="robot_upper_plugins/RouteGoalTool"
+         type="robot_upper_plugins::RouteGoalTool"
+         base_class_type="rviz::Tool">
+    <description>
+      在rviz中通过画线发布导航目标的工具
+    </description>
+  </class>
+  <class name="robot_upper_plugins/ObstacleAddTool"
+         type="robot_upper_plugins::ObstacleAddTool"
+	 base_class_type="rviz::Tool">
+    <description>
+      在rviz中通过画线发布导航目标的工具
+    </description>
+  </class>
+</library>

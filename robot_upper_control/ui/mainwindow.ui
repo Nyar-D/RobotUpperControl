@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QWidget" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="set_mapSelect_btn">
+   <property name="geometry">
+    <rect>
+     <x>532</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>选择地图</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_pointGoal_btn">
+   <property name="geometry">
+    <rect>
+     <x>188</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>单点导航</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_obstacleDel_btn">
+   <property name="geometry">
+    <rect>
+     <x>446</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>消除障碍</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_pos_btn">
+   <property name="geometry">
+    <rect>
+     <x>102</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>设置坐标</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_interact_btn">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>30</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>移动视角</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_routeGoal_btn">
+   <property name="geometry">
+    <rect>
+     <x>274</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>画线导航</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="set_obstacleAdd_btn">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>11</y>
+     <width>80</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>80</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>添加障碍</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
