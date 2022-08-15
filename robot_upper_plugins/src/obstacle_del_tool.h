@@ -1,5 +1,5 @@
-#ifndef OBSTACLE_ADD_TOOL_H
-#define OBSTACLE_ADD_TOOL_H
+#ifndef OBSTACLE_DEL_TOOL_H
+#define OBSTACLE_DEL_TOOL_H
 
 #include <ros/ros.h>
 #include <rviz/tool.h>
@@ -13,12 +13,12 @@
 namespace robot_upper_plugins
 {
 
-class ObstacleAddTool : public rviz::Tool {
+class ObstacleDelTool : public rviz::Tool {
   Q_OBJECT
 
 public:
-  ObstacleAddTool();
-  ~ObstacleAddTool();
+  ObstacleDelTool();
+  ~ObstacleDelTool();
   virtual void onInitialize();
   virtual void activate();
   virtual void deactivate();
@@ -30,7 +30,7 @@ Q_SIGNALS:
   void toolDeactivated(void);
 
 private Q_SLOTS:
-  void sendObstacleAddRequest(QString genMapName);
+  void sendObstacleDelRequest(QString genMapName);
 
 private:
   void addNewLine();
@@ -57,4 +57,4 @@ private:
 } // end namespace robot_upper_plugins
 
 
-#endif // OBSTACLE_ADD_TOOL_H
+#endif // OBSTACLE_DEL_TOOL_H

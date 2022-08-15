@@ -1,0 +1,6 @@
+# 增加或消除障碍物
+string mode
+string gen_map_name
+geometry_msgs/Point[] points
+---
+string status

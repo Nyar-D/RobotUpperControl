@@ -10,7 +10,14 @@
          type="robot_upper_plugins::ObstacleAddTool"
 	 base_class_type="rviz::Tool">
     <description>
-      在rviz中通过画线发布导航目标的工具
+      在rviz中添加障碍物的工具
+    </description>
+  </class>
+  <class name="robot_upper_plugins/ObstacleDelTool"
+         type="robot_upper_plugins::ObstacleDelTool"
+	 base_class_type="rviz::Tool">
+    <description>
+      在rviz中消除障碍物的工具
     </description>
   </class>
 </library>

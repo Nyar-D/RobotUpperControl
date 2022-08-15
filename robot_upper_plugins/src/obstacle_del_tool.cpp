@@ -1,27 +1,27 @@
 #include <QString>
-#include "obstacle_add_tool.h"
+#include "obstacle_del_tool.h"
 #include "robot_upper_plugins/MapCrop.h"
 #include "robot_upper_plugins/MapEditObstacle.h"
 
 namespace robot_upper_plugins
 {
 
-ObstacleAddTool::ObstacleAddTool() :
+ObstacleDelTool::ObstacleDelTool() :
   Tool()
 {
   shortcut_key_ = 'm';
 }
 
-ObstacleAddTool::~ObstacleAddTool()
+ObstacleDelTool::~ObstacleDelTool()
 {
   destoryAllPoints();
   delete obstacle_line_;
   delete nh_;
 }
 
-void ObstacleAddTool::onInitialize()
+void ObstacleDelTool::onInitialize()
 {
-  setName("Obstacle Add");
+  setName("Obstacle Del");
 
   setlocale(LC_ALL, "");
   nh_ = new ros::NodeHandle();
@@ -38,12 +38,12 @@ void ObstacleAddTool::onInitialize()
   hit_cursor_ = rviz::makeIconCursor( "package://rviz/icons/crosshair.svg" );
 }
 
-void ObstacleAddTool::activate()
+void ObstacleDelTool::activate()
 {
   state_ = END;
 }
 
-void ObstacleAddTool::deactivate()
+void ObstacleDelTool::deactivate()
 {
   state_ = END;
   destoryAllPoints();
@@ -53,15 +53,15 @@ void ObstacleAddTool::deactivate()
   Q_EMIT toolDeactivated();
 }
 
-void ObstacleAddTool::save( rviz::Config config ) const
+void ObstacleDelTool::save( rviz::Config config ) const
 {
 }
 
-void ObstacleAddTool::load( const rviz::Config& config )
+void ObstacleDelTool::load( const rviz::Config& config )
 {
 }
 
-int ObstacleAddTool::processMouseEvent( rviz::ViewportMouseEvent& event )
+int ObstacleDelTool::processMouseEvent( rviz::ViewportMouseEvent& event )
 {
   int flags = 0;
   Ogre::Vector3 pos;
@@ -112,7 +112,7 @@ int ObstacleAddTool::processMouseEvent( rviz::ViewportMouseEvent& event )
   return flags;
 }
 
-void ObstacleAddTool::sendObstacleAddRequest(QString genMapName)
+void ObstacleDelTool::sendObstacleDelRequest(QString genMapName)
 {
   if (current_line_ == -1) {
     ROS_INFO("没有添加障碍物");
@@ -121,7 +121,7 @@ void ObstacleAddTool::sendObstacleAddRequest(QString genMapName)
 
   // 发送服务请求
   robot_upper_plugins::MapEditObstacle mao;
-  mao.request.mode = "add";
+  mao.request.mode = "delete";
   mao.request.gen_map_name = genMapName.toStdString();
   for (int i = 0; i <= current_line_; i++) {
     for (auto iter = points_list_[i]->begin(); iter != points_list_[i]->end(); iter++) {
@@ -148,7 +148,7 @@ void ObstacleAddTool::sendObstacleAddRequest(QString genMapName)
     ROS_ERROR("Obstacle Add: 服务调用失败！");
 }
 
-void ObstacleAddTool::addNewLine()
+void ObstacleDelTool::addNewLine()
 {
   obstacle_line_->newLine();
   points* new_points = new points();
@@ -156,7 +156,7 @@ void ObstacleAddTool::addNewLine()
   current_line_++;
 }
 
-void ObstacleAddTool::destoryAllPoints()
+void ObstacleDelTool::destoryAllPoints()
 {
   for (auto iter = points_list_.begin(); iter != points_list_.end(); iter++) {
     if (*iter != nullptr) {
@@ -170,4 +170,4 @@ void ObstacleAddTool::destoryAllPoints()
 } // end namespace robot_upper_plugins
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(robot_upper_plugins::ObstacleAddTool, rviz::Tool )
+PLUGINLIB_EXPORT_CLASS(robot_upper_plugins::ObstacleDelTool, rviz::Tool )

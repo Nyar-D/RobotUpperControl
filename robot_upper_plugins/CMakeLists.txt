@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## 配置srv源文件
 add_service_files(
   FILES
-  MapAddObstacle.srv
+  MapEditObstacle.srv
   MapCrop.srv
 )
 
@@ -59,6 +59,7 @@ set(SRC_FILES
 #  src/teleop_panel.cpp
   src/route_goal_tool.cpp
   src/obstacle_add_tool.cpp
+  src/obstacle_del_tool.cpp
 )
 
 add_library(${PROJECT_NAME} ${SRC_FILES})

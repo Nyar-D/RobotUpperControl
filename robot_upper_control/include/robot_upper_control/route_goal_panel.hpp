@@ -45,7 +45,7 @@ class QRouteGoalPanel : public QObject
 
 public:
 
-  explicit QRouteGoalPanel(QBoxLayout *parent = 0) :
+  explicit QRouteGoalPanel(QWidget *parent = 0) :
     maxNumGoal_(1)
   {
     if (parent != nullptr)

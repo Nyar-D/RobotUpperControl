@@ -13,8 +13,8 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent) :
 
   // 嵌入视图控件
   main_VBox = new QVBoxLayout();
-  qrender_panel = new rviz_panel::QRenderPanel(main_VBox);
-  qroute_goal_penel = new rviz_panel::QRouteGoalPanel(main_VBox);
+  qrender_panel = new rviz_panel::QRenderPanel(this);
+  qroute_goal_penel = new rviz_panel::QRouteGoalPanel(this);
   QHBoxLayout* panel_HBox = new QHBoxLayout();
   QHBoxLayout* btn_HBox = new QHBoxLayout();
   btn_HBox->addWidget(ui->set_interact_btn);
@@ -71,9 +71,6 @@ void MainWindow::on_set_obstacleDel_btn_clicked()
 
 void MainWindow::on_set_mapSelect_btn_clicked()
 {
-  MapSelectDialog *dialog = new MapSelectDialog(this);
-  dialog->setWindowTitle(tr("hello"));
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->exec();
+  qrender_panel->selectMap();
 }
 

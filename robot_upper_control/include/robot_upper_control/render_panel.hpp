@@ -15,6 +15,9 @@
 #include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
 #include <rviz/view_manager.h>
 #include <QDebug>
+#include <std_msgs/String.h>
+
+#include "mapselectdialog.h"
 
 namespace rviz_panel {
 
@@ -24,7 +27,7 @@ class QRenderPanel : public QObject
 
 public:
 
-  explicit QRenderPanel(QBoxLayout *parent = nullptr) :
+  explicit QRenderPanel(QWidget *parent = nullptr) :
     grid_(nullptr),
     robot_model_(nullptr),
     marker_(nullptr),
@@ -38,6 +41,9 @@ public:
   {
     if (parent != nullptr)
       setParent(parent);
+
+    nh_ = new ros::NodeHandle("robot_upper_control");
+    map_req_pub = nh_->advertise<std_msgs::String>("static_map", 1);
 
     // 创建3D面板、中央管理器和tool管理器
     render_panel_ = new rviz::RenderPanel();
@@ -71,6 +77,7 @@ public:
       tool_manager_->addTool("rviz/SetGoal");
       tool_manager_->addTool("robot_upper_plugins/RouteGoalTool");
       tool_manager_->addTool("robot_upper_plugins/ObstacleAddTool");
+      tool_manager_->addTool("robot_upper_plugins/ObstacleDelTool");
     }
   }
 
@@ -312,20 +319,31 @@ public:
     local_path_->setEnabled(enable);
   }
 
+  bool setCurrentTool(int toolIndex)
+  {
+    rviz::Tool* tool = tool_manager_->getTool(toolIndex);
+    if (tool == current_tool_)
+      return false;
+
+    current_tool_ = tool;
+    tool_manager_->setCurrentTool(tool);
+    return true;
+  }
+
   void setInteract()
   {
     // 设置当前使用的工具
-    tool_manager_->setCurrentTool(tool_manager_->getTool(Interact));
+    if (!setCurrentTool(Interact)) return;
   }
 
   void setPos()
   {
-    tool_manager_->setCurrentTool(tool_manager_->getTool(SetInitialPose));
+    if (!setCurrentTool(SetInitialPose)) return;
   }
 
   void setPointGoal()
   {
-    tool_manager_->setCurrentTool(tool_manager_->getTool(SetGoal));
+    if (!setCurrentTool(SetGoal)) return;
     //设置goal的话题
     rviz::Property* pro= tool_manager_->getCurrentTool()->getPropertyContainer();
     pro->subProp("Topic")->setValue("/robot_upper_control/goal_temp");
@@ -334,20 +352,59 @@ public:
 
   void setRouteGoal()
   {
+    if (!setCurrentTool(RouteGoalTool)) return;
     visualization_manager_->setFixedFrame("map");
-    tool_manager_->setCurrentTool(tool_manager_->getTool(RouteGoalTool));
   }
 
   void addObstacle()
   {
+    if (!setCurrentTool(ObstacleAddTool)) return;
     visualization_manager_->setFixedFrame("map");
-    tool_manager_->setCurrentTool(tool_manager_->getTool(ObstacleAddTool));
+
+    MapSelectDialog *dialog = new MapSelectDialog();  // TODO: parent!
+    dialog->setWindowTitle(tr("保存到地图"));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    connect(dialog, SIGNAL(dialogClose(void)), this, SLOT(setDefaultTool(void)), Qt::UniqueConnection);
+    connect(dialog, SIGNAL(confirm_signal(QString)), current_tool_, SLOT(sendObstacleAddRequest(QString)), Qt::UniqueConnection);
+    connect(current_tool_, SIGNAL(toolDeactivated(void)), dialog, SLOT(closeDialog(void)), Qt::UniqueConnection);
+    dialog->show();
   }
 
   void delObstacle()
   {
+    if (!setCurrentTool(ObstacleDelTool)) return;
     visualization_manager_->setFixedFrame("map");
-    tool_manager_->setCurrentTool(tool_manager_->getTool(ObstacleAddTool));
+
+    MapSelectDialog *dialog = new MapSelectDialog();  // TODO: parent!
+    dialog->setWindowTitle(tr("保存到地图"));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    connect(dialog, SIGNAL(dialogClose(void)), this, SLOT(setDefaultTool(void)), Qt::UniqueConnection);
+    connect(dialog, SIGNAL(confirm_signal(QString)), current_tool_, SLOT(sendObstacleDelRequest(QString)), Qt::UniqueConnection);
+    connect(current_tool_, SIGNAL(toolDeactivated(void)), dialog, SLOT(closeDialog(void)), Qt::UniqueConnection);
+    dialog->show();
+  }
+
+  void selectMap()
+  {
+    MapSelectDialog *dialog = new MapSelectDialog();
+    dialog->setWindowTitle(tr("选择地图"));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    connect(dialog, SIGNAL(dialogClose(void)), this, SLOT(setDefaultTool(void)), Qt::UniqueConnection);
+    connect(dialog, &MapSelectDialog::confirm_signal, this, [&](QString mapName){
+      std_msgs::String msg;
+      msg.data = mapName.toStdString();
+      map_req_pub.publish(msg);
+    }, Qt::UniqueConnection);
+    dialog->exec();
+  }
+
+
+public slots:
+
+  void setDefaultTool(void)
+  {
+    current_tool_ = tool_manager_->getTool(Interact);
+    tool_manager_->setCurrentTool(tool_manager_->getDefaultTool());
   }
 
 
@@ -356,6 +413,7 @@ private:
   rviz::RenderPanel* render_panel_;
   rviz::VisualizationManager* visualization_manager_;
   rviz::ToolManager* tool_manager_;
+  rviz::Tool* current_tool_;
   rviz::Display* grid_;
   rviz::Display* robot_model_;
   rviz::Display* marker_;
@@ -367,12 +425,16 @@ private:
   rviz::Display* global_path_;
   rviz::Display* local_path_;
 
+  ros::NodeHandle* nh_;
+  ros::Publisher map_req_pub;
+
   enum{
     Interact,
     SetInitialPose,
     SetGoal,
     RouteGoalTool,
-    ObstacleAddTool
+    ObstacleAddTool,
+    ObstacleDelTool
   };
 };
 
