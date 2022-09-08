@@ -36,9 +36,9 @@ void RouteGoalTool::onInitialize()
 
   // 路线绘制
   goal_line_ = new rviz::BillboardLine(context_->getSceneManager());
-  goal_line_->setColor(1, 1, 1, 1);
-  goal_line_->setLineWidth(0.05);
-  goal_line_->setMaxPointsPerLine(500);
+  goal_line_->setColor(1, 1, 1, 0.5);
+  goal_line_->setLineWidth(0.025);
+  goal_line_->setMaxPointsPerLine(1000);
   goal_line_->setNumLines(1);
   std_cursor_ = rviz::getDefaultCursor();
   hit_cursor_ = rviz::makeIconCursor( "package://rviz/icons/crosshair.svg" );

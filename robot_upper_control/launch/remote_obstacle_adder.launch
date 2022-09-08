@@ -1,9 +1,0 @@
-<launch>
-
-  <!--这里env.bash文件的文件名是可以自己指定的-->
-  <machine name="robot" address="robot" user="root" password="123456" env-loader="/opt/ROS_ws/my_robot_ws/src/robot_bringup/remote_env/env.bash" />
-
-  <!--通过machine属性的指定，可以让talker节点运行在主机foo上-->
-  <node machine="robot" name="obstacle_adder" pkg="robot_navigation" type="obstacle_adder.py" />
-
-</launch>

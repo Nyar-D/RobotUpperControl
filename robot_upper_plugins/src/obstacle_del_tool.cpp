@@ -25,12 +25,12 @@ void ObstacleDelTool::onInitialize()
 
   setlocale(LC_ALL, "");
   nh_ = new ros::NodeHandle();
-  aobs_client_ = nh_->serviceClient<robot_upper_plugins::MapEditObstacle>("MapEditObstacle");
+  aobs_client_ = nh_->serviceClient<robot_upper_plugins::MapEditObstacle>("edit_map_obsatacle");
 
   obstacle_line_ = new rviz::BillboardLine(context_->getSceneManager());
   obstacle_line_->setColor(1, 1, 1, 1);
-  obstacle_line_->setLineWidth(0.05);
-  obstacle_line_->setMaxPointsPerLine(500);
+  obstacle_line_->setLineWidth(0.04);
+  obstacle_line_->setMaxPointsPerLine(1000);
   obstacle_line_->setNumLines(30);
 
   // 路线绘制
@@ -134,7 +134,7 @@ void ObstacleDelTool::sendObstacleDelRequest(QString genMapName)
   }
 
   // 等待服务响应
-  ros::service::waitForService("MapEditObstacle");
+  ros::service::waitForService("edit_map_obsatacle");
   bool flag = aobs_client_.call(mao);
   if (flag) {
     const std::string status = mao.response.status;

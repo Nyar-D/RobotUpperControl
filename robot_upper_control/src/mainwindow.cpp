@@ -15,7 +15,7 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent) :
   main_VBox = new QVBoxLayout();
   qrender_panel = new rviz_panel::QRenderPanel(this);
   qroute_goal_penel = new rviz_panel::QRouteGoalPanel(this);
-  QHBoxLayout* panel_HBox = new QHBoxLayout();
+
   QHBoxLayout* btn_HBox = new QHBoxLayout();
   btn_HBox->addWidget(ui->set_interact_btn);
   btn_HBox->addWidget(ui->set_pos_btn);
@@ -23,9 +23,26 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent) :
   btn_HBox->addWidget(ui->set_routeGoal_btn);
   btn_HBox->addWidget(ui->set_obstacleAdd_btn);
   btn_HBox->addWidget(ui->set_obstacleDel_btn);
-  btn_HBox->addStretch();
-  panel_HBox->addLayout(qroute_goal_penel->getPanel());
-  panel_HBox->addWidget(qrender_panel->getPanel());
+  btn_HBox->addWidget(ui->set_mapSelect_btn);
+
+  QHBoxLayout* panel_HBox = new QHBoxLayout();
+  QBoxLayout *rg_panel = qroute_goal_penel->getPanel();
+  rviz::RenderPanel *re_panel = qrender_panel->getPanel();
+  hide_left_dock_button_ = new QToolButton(this);
+  hide_left_dock_button_->setContentsMargins(0,0,0,0);
+  hide_left_dock_button_->setArrowType( Qt::LeftArrow );
+  hide_left_dock_button_->setSizePolicy( QSizePolicy( QSizePolicy::Minimum, QSizePolicy::Expanding ) );
+  hide_left_dock_button_->setFixedWidth(16);
+  hide_left_dock_button_->setAutoRaise(true);
+  hide_left_dock_button_->setCheckable(true);
+
+  panel_HBox->addLayout(rg_panel);
+  panel_HBox->addWidget(hide_left_dock_button_);
+  panel_HBox->addWidget(re_panel);
+  panel_HBox->setStretchFactor(rg_panel, 1);
+  panel_HBox->setStretchFactor(hide_left_dock_button_, 1);
+  panel_HBox->setStretchFactor(re_panel, 5);
+
   main_VBox->addLayout(btn_HBox);
   main_VBox->addLayout(panel_HBox);
   this->setLayout(main_VBox);
@@ -34,8 +51,9 @@ MainWindow::MainWindow(int argc, char **argv, QWidget *parent) :
 MainWindow::~MainWindow()
 {
   delete ui;
-  delete qrender_panel;
   delete qnode;
+  delete qrender_panel;
+  delete qroute_goal_penel;
   delete main_VBox;
 }
 

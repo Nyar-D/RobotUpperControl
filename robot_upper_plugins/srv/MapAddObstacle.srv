@@ -1,4 +1,0 @@
-geometry_msgs/Point[] points
-string gen_map_name
----
-string status

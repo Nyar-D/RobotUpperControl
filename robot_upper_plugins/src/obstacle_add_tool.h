@@ -42,7 +42,7 @@ private:
     END
   } state_;
 
-  typedef std::multimap<double, double> points;
+  typedef std::set<std::pair<double, double>> points;
   QList<points*> points_list_;  // 储存每条线上的点
   rviz::BillboardLine* obstacle_line_;
   unsigned int current_line_ = -1;

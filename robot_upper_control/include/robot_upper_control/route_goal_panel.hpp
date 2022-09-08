@@ -21,13 +21,6 @@
 #include <actionlib_msgs/GoalStatusArray.h>
 #include <tf/transform_datatypes.h>
 
-#include <cstdio>
-
-#include <ros/console.h>
-
-#include <fstream>
-#include <sstream>
-
 #include <QPainter>
 #include <QLineEdit>
 #include <QVBoxLayout>
@@ -129,11 +122,9 @@ private slots:
     pose_array_.poses.clear();
     removeRouteMark();
 
-    QSizePolicy policy = poseArray_table_->sizePolicy();
-    policy.setHorizontalPolicy(QSizePolicy::Fixed);
-    policy.setVerticalPolicy(QSizePolicy::Expanding);
-    poseArray_table_->setSizePolicy(policy);
-    poseArray_table_->setFixedWidth(253);
+    poseArray_table_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
+    poseArray_table_->horizontalHeader()->setMinimumSectionSize(40);
+    poseArray_table_->horizontalHeader()->setMinimumSize(40, 25);
     poseArray_table_->setRowCount(maxNumGoal_);
     poseArray_table_->setColumnCount(3);
     poseArray_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -192,13 +183,15 @@ private:
     maxNumGoal_layout->addWidget(new QLabel("目标数量"));
     // LineEdit
     output_maxNumGoal_editor_ = new QLineEdit();
-    output_maxNumGoal_editor_->setFixedWidth(100);
-    output_maxNumGoal_editor_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    output_maxNumGoal_editor_->setMinimumWidth(20);
+    output_maxNumGoal_editor_->setFixedHeight(25);
+    output_maxNumGoal_editor_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     maxNumGoal_layout->addWidget(output_maxNumGoal_editor_);
     // Button
     output_maxNumGoal_button_ = new QPushButton("确定");
+    output_maxNumGoal_button_->setMinimumWidth(40);
     output_maxNumGoal_button_->setFixedHeight(25);
-    output_maxNumGoal_button_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+    output_maxNumGoal_button_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
     maxNumGoal_layout->addWidget(output_maxNumGoal_button_);
     panel_layout_->addLayout(maxNumGoal_layout);
 
@@ -217,18 +210,18 @@ private:
     manipulate_layout->setAlignment(Qt::AlignJustify);
     // Button
     output_reset_button_ = new QPushButton("重置");
-    output_reset_button_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    output_reset_button_->setFixedWidth(80);
+    output_reset_button_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    output_reset_button_->setMinimumSize(40, 25);
     manipulate_layout->addWidget(output_reset_button_);
     // Button
     output_cancel_button_ = new QPushButton("取消");
-    output_cancel_button_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    output_cancel_button_->setFixedWidth(80);
+    output_cancel_button_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    output_cancel_button_->setMinimumSize(40, 25);
     manipulate_layout->addWidget(output_cancel_button_);
     // Button
-    output_startNavi_button_ = new QPushButton("开始导航!");
-    output_startNavi_button_->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-    output_startNavi_button_->setFixedWidth(80);
+    output_startNavi_button_ = new QPushButton("导航");
+    output_startNavi_button_->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
+    output_startNavi_button_->setMinimumSize(40, 25);
     manipulate_layout->addWidget(output_startNavi_button_);
     panel_layout_->addLayout(manipulate_layout);
 
@@ -241,37 +234,38 @@ private:
     connect(output_startNavi_button_, SIGNAL(clicked()), this, SLOT(startNavi()));
   }
 
-  void writePose(geometry_msgs::Pose pose)
-  {
-    poseArray_table_->setItem(pose_array_.poses.size() - 1, 0,
-                              new QTableWidgetItem(QString::number(pose.position.x, 'f', 2)));
-    poseArray_table_->setItem(pose_array_.poses.size() - 1, 1,
-                              new QTableWidgetItem(QString::number(pose.position.y, 'f', 2)));
-    poseArray_table_->setItem(pose_array_.poses.size() - 1, 2,
-                              new QTableWidgetItem(
-                                QString::number(tf::getYaw(pose.orientation) * 180.0 / 3.14, 'f', 2)));
-  }
+    void writePose(geometry_msgs::Pose pose)
+    {
+      poseArray_table_->setItem(pose_array_.poses.size() - 1, 0,
+                                new QTableWidgetItem(QString::number(pose.position.x, 'f', 2)));
+      poseArray_table_->setItem(pose_array_.poses.size() - 1, 1,
+                                new QTableWidgetItem(QString::number(pose.position.y, 'f', 2)));
+      poseArray_table_->setItem(pose_array_.poses.size() - 1, 2,
+                                new QTableWidgetItem(
+                                  QString::number(tf::getYaw(pose.orientation) * 180.0 / 3.14, 'f', 2)));
+    }
 
-  void markPose(const geometry_msgs::PoseStamped::ConstPtr &pose)
-  {
-    if (ros::ok()) {
-      visualization_msgs::Marker arrow;
-      visualization_msgs::Marker number;
-      arrow.header.frame_id = number.header.frame_id = pose->header.frame_id;
-      arrow.ns = "navi_point_arrow";
-      number.ns = "navi_point_number";
-      arrow.action = number.action = visualization_msgs::Marker::ADD;
-      arrow.type = visualization_msgs::Marker::ARROW;
-      number.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-      arrow.pose = number.pose = pose->pose;
-      number.pose.position.z += 1.0;
-      arrow.scale.x = 0.5;
-      arrow.scale.y = 0.2;
-      number.scale.z = 0.5;
-      arrow.color.r = number.color.r = 1.0f;
-      arrow.color.g = number.color.g = 1.0f;
-      arrow.color.b = number.color.b = 1.0f;
-      arrow.color.a = number.color.a = 0.7;
+    void markPose(const geometry_msgs::PoseStamped::ConstPtr &pose)
+    {
+      if (ros::ok()) {
+        visualization_msgs::Marker arrow;
+        visualization_msgs::Marker number;
+        arrow.header.frame_id = number.header.frame_id = pose->header.frame_id;
+        arrow.ns = "navi_point_arrow";
+        number.ns = "navi_point_number";
+        arrow.action = number.action = visualization_msgs::Marker::ADD;
+        arrow.type = visualization_msgs::Marker::ARROW;
+        number.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+        arrow.pose = number.pose = pose->pose;
+        number.pose.position.z += 1.0;
+        arrow.pose.position.z += 0.01;
+        arrow.scale.x = 0.3;
+        arrow.scale.y = 0.04;
+        number.scale.z = 0.3;
+        arrow.color.r = number.color.r = 0.0f;
+        arrow.color.g = number.color.g = 0.0f;
+        arrow.color.b = number.color.b = 0.0f;
+        arrow.color.a = number.color.a = 0.7;
       arrow.id = number.id = pose_array_.poses.size();
       number.text = std::to_string(pose_array_.poses.size());
       marker_pub_.publish(arrow);

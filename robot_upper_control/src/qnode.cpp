@@ -21,7 +21,7 @@ void QNode::init()
   setlocale(LC_ALL, "");
 
   // 初始化ros节点
-  ros::init(init_argc, init_argv, "robot_upper_control");
+  ros::init(init_argc, init_argv, "robot_upper_control", ros::init_options::AnonymousName);
   while(!ros::master::check()) {
     qDebug() << "等待主节点启动...";
     sleep(1);

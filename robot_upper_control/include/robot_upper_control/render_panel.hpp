@@ -30,7 +30,8 @@ public:
   explicit QRenderPanel(QWidget *parent = nullptr) :
     grid_(nullptr),
     robot_model_(nullptr),
-    marker_(nullptr),
+    goal_arrow_marker_(nullptr),
+    goal_pose_(nullptr),
     map_(nullptr),
     laser_scan_(nullptr),
     pose_array_(nullptr),
@@ -58,16 +59,17 @@ public:
 
     // 设置插件
     setGlobalOptions("/map", QColor(48, 48, 48), 30);
-    enableGrid(true, "<Fixed Frame>", 80, 1.0, QColor(160, 160, 164));
+    enableGrid(true, "<Fixed Frame>", 20, 1.0, QColor(160, 160, 164));
     enableRobotModel(true, "robot_description");
-    enableMarker(true, "/robot_upper_control/goal_marker");
-    enableMap(true, "/map", 0.5, "map");
-    enableLaserScan(true, "/scan");
-    enablePoseArray(true, "/particlecloud", "Arrow(Flat)", QColor(170, 255, 127));
-    enableGlobalMap(true, "/move_base/global_costmap/costmap", "costmap");
-    enableLocalMap(true, "/move_base/local_costmap/costmap", "map");
-    enableGlobalPath(true, "/move_base/TrajectoryPlannerROS/global_plan", QColor(25, 255, 0));
-    enableLocalPath(true, "/move_base/TrajectoryPlannerROS/local_plan", QColor(164, 0, 0));
+    enableGoalArrowMarker(true, "/robot_upper_control/goal_marker");
+    enableMap(true, "/map");
+    enableLaserScan(true, "/scan", QColor(0, 255, 0));
+    enablePoseArray(true, "/particlecloud", QColor(0, 192, 0));
+    enableGoalPose(true, "/move_base_simple/goal", QColor(255, 25, 0));
+    enableGlobalCostmap(true, "/move_base/global_costmap/costmap");
+    enableLocalCostmap(true, "/move_base/local_costmap/costmap");
+    enableGlobalPlanner(true, "/move_base/TrajectoryPlannerROS/global_plan", QColor(255, 0, 0));
+    enableLocalPlanner(true, "/move_base/TrajectoryPlannerROS/local_plan", QColor(255, 255, 0));
 
     // 设置工具
     if (tool_manager_) {
@@ -88,7 +90,7 @@ public:
     delete tool_manager_;
     delete grid_;
     delete robot_model_;
-    delete marker_;
+    delete goal_arrow_marker_;
     delete map_;
     delete laser_scan_;
     delete pose_array_;
@@ -104,14 +106,14 @@ public:
     return this->render_panel_;
   }
 
-  void setGlobalOptions(QString frame_name,  QColor Background_Color, int Frame_Rate)
+  void setGlobalOptions(QString frameName,  QColor backgroundColor, int frameRate)
   {
-    visualization_manager_->setFixedFrame(frame_name);
-    visualization_manager_->setProperty("Background Color", Background_Color);
-    visualization_manager_->setProperty("Frame Rate", Frame_Rate);
+    visualization_manager_->setFixedFrame(frameName);
+    visualization_manager_->setProperty("Background Color", backgroundColor);
+    visualization_manager_->setProperty("Frame Rate", frameRate);
   }
 
-  void enableGrid(bool enable, QString Reference_Frame, int Plan_Cell_Count, float Cell_Size, QColor Color=QColor(125, 125, 125))
+  void enableGrid(bool enable, QString referenceFrame, int planCellCount, float cellSize, QColor color=QColor(125, 125, 125))
   {
     if(!enable && grid_)
     {
@@ -125,18 +127,18 @@ public:
     // 创建一个类型为rviz/Grid的网格图层grid_, 根据传入参数设置其在rviz左侧的参数设置
     grid_ = visualization_manager_->createDisplay("rviz/Grid", "QGrid", true);
     ROS_ASSERT(grid_ != nullptr);
-    grid_->subProp("Color")->setValue(Color);
-    grid_->subProp("Reference Frame")->setValue(Reference_Frame);
-    grid_->subProp("Plane Cell Count")->setValue(Plan_Cell_Count);
+    grid_->subProp("Color")->setValue(color);
+    grid_->subProp("Reference Frame")->setValue(referenceFrame);
+    grid_->subProp("Plane Cell Count")->setValue(planCellCount);
+    grid_->subProp("Cell Size")->setValue(cellSize);
     grid_->subProp("Line Style")->setValue("Lines");
-    grid_->subProp("Cell Size")->setValue(Cell_Size);
     grid_->subProp("Alpha")->setValue(0.5);
-    // rid_->subProp("Plane")->setV alue("XY");
-    // grid_->subProp("Normal Cell Count")->setValue("0");
+    grid_->subProp("Plane")->setValue("XY");
+    grid_->subProp("Normal Cell Count")->setValue("0");
     grid_->setEnabled(enable);
   }
 
-  void enableRobotModel(bool enable, QString Robot_Description)
+  void enableRobotModel(bool enable, QString robotDescription)
   {
     if(!enable && robot_model_)
     {
@@ -152,29 +154,28 @@ public:
     ROS_ASSERT(robot_model_ != nullptr);
     robot_model_->subProp("Update Interval")->setValue("0");
     robot_model_->subProp("Alpha")->setValue("1");
-    robot_model_->subProp("Robot Description")->setValue(Robot_Description);
+    robot_model_->subProp("Robot Description")->setValue(robotDescription);
     robot_model_->setEnabled(enable);
   }
 
-  void enableMarker(bool enable, QString Marker_Topic)
+  void enableGoalArrowMarker(bool enable, QString markerTopic)
   {
-    if(!enable && marker_)
+    if(!enable && goal_arrow_marker_)
     {
-      marker_->setEnabled(false);
+      goal_arrow_marker_->setEnabled(false);
       return ;
     }
 
-    if (marker_)
-      delete marker_;
+    if (goal_arrow_marker_)
+      delete goal_arrow_marker_;
 
-    // 创建robotModel图层，显示机器人模型
-    marker_ = visualization_manager_->createDisplay("rviz/Marker", "QMarker", true);
-    ROS_ASSERT(marker_ != nullptr);
-    marker_->subProp("Marker Topic")->setValue(Marker_Topic);
-    marker_->setEnabled(enable);
+    goal_arrow_marker_ = visualization_manager_->createDisplay("rviz/Marker", "GoalArrowMarker", true);
+    ROS_ASSERT(goal_arrow_marker_ != nullptr);
+    goal_arrow_marker_->subProp("Marker Topic")->setValue(markerTopic);
+    goal_arrow_marker_->setEnabled(enable);
   }
 
-  void enableMap(bool enable, QString Topic, double Alpha, QString Color_Scheme)
+  void enableMap(bool enable, QString topic)
   {
     if(!enable && map_)
     {
@@ -188,13 +189,13 @@ public:
     // 创建map图层map_，接收/map的数据
     map_=visualization_manager_->createDisplay("rviz/Map", "QMap", true);
     ROS_ASSERT(map_);
-    map_->subProp("Topic")->setValue(Topic);
-    map_->subProp("Alpha")->setValue(Alpha);
-    map_->subProp("Color Scheme")->setValue(Color_Scheme);
+    map_->subProp("Topic")->setValue(topic);
+    map_->subProp("Alpha")->setValue("0.7");
+    map_->subProp("Color Scheme")->setValue("map");
     map_->setEnabled(enable);
   }
 
-  void enableLaserScan(bool enable, QString Topic)
+  void enableLaserScan(bool enable, QString topic, QColor color)
   {
     if(!enable && laser_scan_)
     {
@@ -208,19 +209,18 @@ public:
     // 创建laser图层laserScan_，接收/scan的数据
     laser_scan_ = visualization_manager_->createDisplay("rviz/LaserScan", "QLaserScan", true);
     ROS_ASSERT(laser_scan_ != nullptr);
-    laser_scan_->subProp("Topic")->setValue(Topic);
+    laser_scan_->subProp("Topic")->setValue(topic);
+    laser_scan_->subProp("Color")->setValue(color);
     laser_scan_->subProp("Style")->setValue("Flat Squares");
     laser_scan_->subProp("Size (m)")->setValue("0.03");
     laser_scan_->subProp("Color Transformer")->setValue("FlatColor");  // how to set color?
-    laser_scan_->subProp("Color")->setValue("255;0;0");
     laser_scan_->subProp("Queue Size")->setValue("10");
     laser_scan_->subProp("Alpha")->setValue("1");
     laser_scan_->subProp("Position Transformer")->setValue("XYZ");
-    laser_scan_->subProp("Channel Name")->setValue("intensity");
     laser_scan_->setEnabled(enable);
   }
 
-  void enablePoseArray(bool enable, QString Topic, QString Shape, QColor Color)
+  void enablePoseArray(bool enable, QString Topic, QColor Color)
   {
     if (!enable && pose_array_)
     {
@@ -235,15 +235,39 @@ public:
     pose_array_ = visualization_manager_->createDisplay("rviz/PoseArray", "QPoseArray", true);
     ROS_ASSERT(pose_array_ != nullptr);
     pose_array_->subProp("Topic")->setValue(Topic);
-    pose_array_->subProp("Shape")->setValue(Shape);
     pose_array_->subProp("Color")->setValue(Color);
-    //  poseArray_->subProp("Queue Size")->setValue(10);
-    //  poseArray_->subProp("Alpha")->setValue(1);
-    //  poseArray_->subProp("Arrow Length")->setValue(0.3);
+    pose_array_->subProp("Shape")->setValue("Arrow(Flat)");
+    pose_array_->subProp("Queue Size")->setValue("10");
+    pose_array_->subProp("Alpha")->setValue(1);
+    pose_array_->subProp("Arrow Length")->setValue(0.05);
     pose_array_->setEnabled(enable);
   }
 
-  void enableGlobalMap(bool enable, QString Topic, QString Color_Scheme)
+  void enableGoalPose(bool enable, QString Topic, QColor color)
+  {
+    if(!enable && goal_pose_)
+    {
+      goal_pose_->setEnabled(false);
+      return ;
+    }
+
+    if (goal_pose_)
+      delete goal_pose_;
+
+    goal_pose_ = visualization_manager_->createDisplay("rviz/Pose", "GoalMarker", true);
+    ROS_ASSERT(goal_pose_ != nullptr);
+    goal_pose_->subProp("Topic")->setValue(Topic);
+    goal_pose_->subProp("Color")->setValue(color);
+    goal_pose_->subProp("Queue Size")->setValue("10");
+    goal_pose_->subProp("Shape")->setValue("Arrow");
+    goal_pose_->subProp("Shaft Length")->setValue("0.5");
+    goal_pose_->subProp("Shaft Radius")->setValue("0.05");
+    goal_pose_->subProp("Head Length")->setValue("0.3");
+    goal_pose_->subProp("Head Radius")->setValue("0.1");
+    goal_pose_->setEnabled(enable);
+  }
+
+  void enableGlobalCostmap(bool enable, QString topic)
   {
     if (!enable && global_map_)
     {
@@ -257,12 +281,13 @@ public:
     // 创建Map图层globalMap_
     global_map_ = visualization_manager_->createDisplay("rviz/Map", "QGlobalMap", true);
     ROS_ASSERT(global_map_ != nullptr);
-    global_map_->subProp("Topic")->setValue(Topic);
-    global_map_->subProp("Color Scheme")->setValue(Color_Scheme);
+    global_map_->subProp("Topic")->setValue(topic);
+    global_map_->subProp("Alpha")->setValue("0.7");
+    global_map_->subProp("Color Scheme")->setValue("costmap");
     global_map_->setEnabled(enable);
   }
 
-  void enableLocalMap(bool enable, QString Topic, QString Color_Scheme)
+  void enableLocalCostmap(bool enable, QString Topic)
   {
     if (!enable && local_map_)
     {
@@ -277,11 +302,12 @@ public:
     local_map_ = visualization_manager_->createDisplay("rviz/Map", "QLocalMap", true);
     ROS_ASSERT(local_map_ != nullptr);
     local_map_->subProp("Topic")->setValue(Topic);
-    local_map_->subProp("Color Scheme")->setValue(Color_Scheme);
+    local_map_->subProp("Alpha")->setValue("0.7");
+    local_map_->subProp("Color Scheme")->setValue("costmap");
     local_map_->setEnabled(enable);
   }
 
-  void enableGlobalPath(bool enable, QString Topic, QColor Color)
+  void enableGlobalPlanner(bool enable, QString Topic, QColor Color)
   {
     if (!enable && global_path_)
     {
@@ -297,10 +323,13 @@ public:
     ROS_ASSERT(global_path_ != nullptr);
     global_path_->subProp("Topic")->setValue(Topic);
     global_path_->subProp("Color")->setValue(Color);
+    global_path_->subProp("Queue Size")->setValue("10");
+    global_path_->subProp("Alpha")->setValue("1");
+    global_path_->subProp("Buffer Length")->setValue("1");
     global_path_->setEnabled(enable);
   }
 
-  void enableLocalPath(bool enable, QString Topic, QColor Color)
+  void enableLocalPlanner(bool enable, QString Topic, QColor Color)
   {
     if (!enable && local_path_)
     {
@@ -316,6 +345,10 @@ public:
     ROS_ASSERT(global_path_ != nullptr);
     local_path_->subProp("Topic")->setValue(Topic);
     local_path_->subProp("Color")->setValue(Color);
+    local_path_->subProp("Queue Size")->setValue("10");
+    local_path_->subProp("Alpha")->setValue("1");
+    local_path_->subProp("Buffer Length")->setValue("1");
+    local_path_->subProp("Line Style")->setValue("Lines");
     local_path_->setEnabled(enable);
   }
 
@@ -333,17 +366,20 @@ public:
   void setInteract()
   {
     // 设置当前使用的工具
-    if (!setCurrentTool(Interact)) return;
+    current_tool_ = tool_manager_->getTool(Interact);
+    tool_manager_->setCurrentTool(current_tool_);
   }
 
   void setPos()
   {
-    if (!setCurrentTool(SetInitialPose)) return;
+    current_tool_ = tool_manager_->getTool(SetInitialPose);
+    tool_manager_->setCurrentTool(current_tool_);
   }
 
   void setPointGoal()
   {
-    if (!setCurrentTool(SetGoal)) return;
+    current_tool_ = tool_manager_->getTool(SetGoal);
+    tool_manager_->setCurrentTool(current_tool_);
     //设置goal的话题
     rviz::Property* pro= tool_manager_->getCurrentTool()->getPropertyContainer();
     pro->subProp("Topic")->setValue("/robot_upper_control/goal_temp");
@@ -416,7 +452,8 @@ private:
   rviz::Tool* current_tool_;
   rviz::Display* grid_;
   rviz::Display* robot_model_;
-  rviz::Display* marker_;
+  rviz::Display* goal_arrow_marker_;
+  rviz::Display* goal_pose_;
   rviz::Display* map_;
   rviz::Display* laser_scan_;
   rviz::Display* pose_array_;

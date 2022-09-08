@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QDebug>
 #include <QThread>
+#include <QToolButton>
 #include "qnode.h"
 #include "render_panel.hpp"
 #include "route_goal_panel.hpp"
@@ -35,9 +36,10 @@ private slots:
 private:
   Ui::MainWindow* ui;
   QNode* qnode;
+  QThread *th_node;
   rviz_panel::QRenderPanel* qrender_panel;
   rviz_panel::QRouteGoalPanel* qroute_goal_penel;
-  QThread *th_node;
+  QToolButton* hide_left_dock_button_;
   QVBoxLayout* main_VBox;
 
 };

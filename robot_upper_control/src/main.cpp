@@ -6,8 +6,8 @@ int main(int argc, char *argv[])
 
 //    class1_robot_upper_control::MainWindow w(argc, argv);
     MainWindow w(argc, argv);
-//    w.show();
-    w.showMaximized();
+    w.show();
+//    w.showMaximized();
 
     return a.exec();
 }
