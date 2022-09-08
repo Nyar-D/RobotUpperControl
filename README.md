@@ -1,3 +1,3 @@
 # robot_upper_control
 ROS安防机器人的上位控制软件，代码和文档正在更新中...
-![exhibition](https://user-images.githubusercontent.com/61311609/184302131-29993a66-5493-42f2-8abd-628ae4a530cb.png)
+<img width="595" alt="exhibition" src="https://user-images.githubusercontent.com/61311609/189124138-16ce603b-ae28-4799-8cdc-4ec0e0b790bb.png">
