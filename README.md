@@ -11,8 +11,8 @@ ROS安防机器人的上位控制软件，代码和文档正在持续更新中~
 
 选择发布地图
 
-![select_map1](https://user-images.githubusercontent.com/61311609/189683845-17798ecb-2d2d-4e82-8441-9ee5d5eba5c9.png)
-![select_map2](https://user-images.githubusercontent.com/61311609/189683860-4ae176c7-d9c7-4625-8852-7bb37d036535.png)
+![select_map1](https://user-images.githubusercontent.com/61311609/189684381-44ef0de4-a5fb-42ad-bdf9-695640b7626e.png)
+![select_map2](https://user-images.githubusercontent.com/61311609/189684465-f74e241c-5ae6-4f2d-9dfc-e25d178b7f96.png)
 
 添加障碍物
 
